@@ -33,9 +33,18 @@ async function init() {
     students = [...new Set(students)];
     students.sort(compareEmail);
     students.push('Extension');
+    const studentBaseClass = 'student list-group-item';
     for (let student of students) {
-        let studentDiv = document.createElement()
-        studentsContainer.innerHTML += `<div id='${student}' class='student'>${student}</div>`;
+        let studentDiv = document.createElement('li');
+        studentDiv.innerHTML = student;
+        studentDiv.className = studentBaseClass;
+        studentsContainer.appendChild(studentDiv);
+        studentDiv.addEventListener('click', function(ev){
+            document.getElementsByClassName('student').array.forEach(element => {
+                element.className = studendBaseClass; // remove any highlighting
+            });
+            ev.target.className = studenBaseClass + ' active';
+        })
 
     }
 
