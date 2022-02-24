@@ -41,7 +41,7 @@ async function init() {
       content += '<option></option>';
       for (let option of scheme.options) {
         let markText = option.mark ? `(${option.mark})` : '';
-        content += `<option value="${section.title}: ${option.description} ${markText}">${option.description}</option>`;
+        content += `<option value="**${section.title}**: *${option.description}* ${markText}">${option.description}</option>`;
       }
       content += '</select></div>';
       if (section.sections) {
@@ -96,6 +96,7 @@ async function init() {
     feedback.innerHTML += `<h2>${section.title}</h2><div id="feedback_${sectionID}"></div>`;
   }
 
+  const converter = new showdown.Converter();
   // need another loop because when innerHTML is updated the forms get recreated, and the event handlers lost
   // could maybe use insertAdjacentHTML instead
   for(let sectionID of sectionIDs){
@@ -106,7 +107,8 @@ async function init() {
       let formContent = new FormData(sectionForm);
       sectionFeedback.innerHTML = '';
       for (let pair of formContent.entries()) {
-        sectionFeedback.innerHTML += `<div>${pair[1]}<div>`;
+        let html = converter.makeHtml(pair[1]);
+        sectionFeedback.innerHTML += `<div>${html}<div>`;
       }
     });
   }
