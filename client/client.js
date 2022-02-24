@@ -99,7 +99,7 @@ async function init() {
   const converter = new showdown.Converter();
   // need another loop because when innerHTML is updated the forms get recreated, and the event handlers lost
   // could maybe use insertAdjacentHTML instead
-  for(let sectionID of sectionIDs){
+  for (let sectionID of sectionIDs) {
     let sectionForm = document.getElementById(`form_${sectionID}`);
     let sectionFeedback = document.getElementById(`feedback_${sectionID}`);
     sectionForm.addEventListener('submit', function (event) {
@@ -139,6 +139,52 @@ async function init() {
     studentOption.innerHTML = student;
     studentSelector.appendChild(studentOption);
   }
+
+  response = await fetch('peer_grades.csv');
+  const peerGrades = Papa.parse(await response.text(), { 'header': false });
+  let grades = {};
+  for (let peerGrade of peerGrades.data) {
+    if (!grades[peerGrade[0]]) {
+      grades[peerGrade[0]] = {}
+    }
+    grades[peerGrade[0]][peerGrade[1]] = peerGrade[2];
+  }
+
+  const clientQualityFeedback = document.getElementById(`feedback_${text2ID('Client-side quality')}`);
+  const serverQualityFeedback = document.getElementById(`feedback_${text2ID('Server-side quality')}`);
+
+  function escapeHTML(html) {
+    var container = document.createElement('div');
+
+    var text = document.createTextNode(html);
+    container.appendChild(text);
+
+    return container.innerHTML;
+  };
+
+  studentSelector.addEventListener('change', function (event) {
+    for(let sectionID of sectionIDs){
+      document.getElementById(`feedback_${sectionID}`).innerHTML = '';
+      document.getElementById(`form_${sectionID}`).reset();
+    }
+    let student = studentSelector.options[studentSelector.selectedIndex].value;
+
+    let cqfol = document.createElement('ol');
+    let sqfol = document.createElement('ol');
+    clientQualityFeedback.innerHTML = `Peer grade ${grades[student].ClientQuality}`;
+    clientQualityFeedback.appendChild(cqfol);
+    serverQualityFeedback.innerHTML = `Peer grade ${grades[student].ServerQuality}`;
+    serverQualityFeedback.appendChild(sqfol);
+
+
+    for (let studentComment of comments[student]) {
+      cqfol.innerHTML += `<li>${escapeHTML(studentComment.ClientComment)}</li>`;
+      sqfol.innerHTML += `<li>${escapeHTML(studentComment.ServerComment)}</li>`;
+    }
+  });
+
+
+
 }
 
 init();
