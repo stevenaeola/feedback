@@ -40,7 +40,7 @@ async function init() {
       content += `<div><select name="${sectionID}_${schemeName}" id="${sectionID}_${schemeName}">`;
       content += '<option></option>';
       for (let option of scheme.options) {
-        let markText = option.mark ? `(${option.mark})` : '';
+        let markText = Number.isFinite(option.mark) ? `(${option.mark})` : '';
         content += `<option value="**${section.title}**: *${option.description}* ${markText}">${option.description}</option>`;
       }
       content += '</select></div>';
@@ -68,9 +68,11 @@ async function init() {
   }
 
   let sectionIDs = [];
+  let sectionMarks = {};
   for (let section of sections) {
     let sectionID = text2ID(section.title);
     sectionIDs.push(sectionID);
+    sectionMarks[sectionID] = Number.NaN;
     let hID = `heading_${sectionID}`;
     let cID = `collapse_${sectionID}`;
     let fID = `form_${sectionID}`;
@@ -95,6 +97,7 @@ async function init() {
     accordion.innerHTML += accordionItem;
     feedback.innerHTML += `<h2>${section.title}</h2><div id="feedback_${sectionID}"></div>`;
   }
+  feedback.innerHTML += `<div id="feedback_total_mark"></div>`;
 
   const converter = new showdown.Converter();
   // need another loop because when innerHTML is updated the forms get recreated, and the event handlers lost
@@ -106,15 +109,44 @@ async function init() {
       event.preventDefault();
       let formContent = new FormData(sectionForm);
       sectionFeedback.innerHTML = '';
+      const markRegExp = /\((?<mark>\d{1,2}(\.\d{1,2})?)\)/
       for (let pair of formContent.entries()) {
         let html = converter.makeHtml(pair[1]);
+        let markMatch = html.match(markRegExp);
+        if(markMatch){
+          let sectionMark = Number(markMatch.groups.mark);
+          console.log(`Mark match ${sectionMark}`);
+          sectionMarks[sectionID] = sectionMark
+        }
+        else{
+          console.log(`No mark match for ${html}`);
+        }
         sectionFeedback.innerHTML += `<div>${html}<div>`;
+        updateTotalMark();
       }
     });
   }
 
+  function updateTotalMark(){
+    let totalMark = 0;
+    for(sectionMark in sectionMarks){
+      totalMark += sectionMarks[sectionMark];
+    }
+    let markFeedback = document.getElementById(`feedback_total_mark`);
+    if(totalMark){
+      let rounded = Math.round(totalMark);
+      markFeedback.innerHTML = `<h2>Total Mark ${rounded}</h2>`;
+    }
+    else{
+      markFeedback.innerHTML = '';
+    }
+  }
 
   const studentSelector = document.getElementById('student_selector');
+  /*
+COMMMENT THIS SECTION IF NO PEER MARKS
+
+
   response = await fetch('comments.csv');
   const externalComments = Papa.parse(await response.text(), { 'header': true });
 
@@ -183,7 +215,8 @@ async function init() {
     }
   });
 
-
+  END COMMENTS HERE IF NO PEER MARKS
+*/
 
 }
 
