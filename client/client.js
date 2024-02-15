@@ -145,6 +145,7 @@ async function init() {
   const studentSelector = document.getElementById('student_selector');
   /*
 COMMMENT THIS SECTION IF NO PEER MARKS
+*/
 
 
   response = await fetch('comments.csv');
@@ -214,7 +215,7 @@ COMMMENT THIS SECTION IF NO PEER MARKS
       sqfol.innerHTML += `<li>${escapeHTML(studentComment.ServerComment)}</li>`;
     }
   });
-
+/*
   END COMMENTS HERE IF NO PEER MARKS
 */
 
