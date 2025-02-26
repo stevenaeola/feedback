@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ASSDIR=Prog/2324/Assignment\ 1/peer_analysis
+ASSDIR=PBlack/2425/assignment_1/peer_analysis
 CLIENTDIR=client
 CLIENTFILES="markscheme.json comments.csv peer_grades.csv"
 for FILE in ${CLIENTFILES} ; do
